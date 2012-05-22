@@ -93,6 +93,11 @@ class Config(object):  # pylint: disable-msg=R0903
                  'user':                'user/%s/',
                  'user_about':          'user/%s/about/',
                  'vote':                'api/vote/',
+                 'wiki':                'r/%s/wiki',
+                 'wiki_edit':           'r/%s/wiki/edit',
+                 'wiki_history':        'r/%s/wiki/revisions',
+                 'wiki_settings':       'r/%s/wiki/settings',
+                 'wiki_talk':           'r/%s/wiki/discussions',
                  'wikibanned':          'r/%s/about/banned/',
                  'wikicontributors':    'r/%s/about/wikicontribute/'}
     SSL_PATHS = ('login', )
@@ -301,7 +306,26 @@ class BaseReddit(object):
         return json.loads(response.decode('utf-8'), object_hook=hook)
 
 
-class SubredditExtension(BaseReddit):
+class WikiExtension(BaseReddit):
+    def __init__(self, *args, **kwargs):
+        super(WikiExtension, self).__init__(*args, **kwargs)
+
+    @reddit.decorators.require_login
+    @reddit.decorators.require_moderator
+    def get_wiki_banned(self, subreddit):
+        """Get the list of wiki banned users for the given subreddit."""
+        return self.request_json(self.config['wikibanned'] %
+                                 six.text_type(subreddit))
+
+    @reddit.decorators.require_login
+    @reddit.decorators.require_moderator
+    def get_wiki_contributors(self, subreddit):
+        """Get the list of wiki contributors for the given subreddit."""
+        return self.request_json(self.config['wikicontributors'] %
+                                 six.text_type(subreddit))
+
+
+class SubredditExtension(WikiExtension):
     def __init__(self, *args, **kwargs):
         super(SubredditExtension, self).__init__(*args, **kwargs)
 
@@ -422,21 +446,6 @@ class SubredditExtension(BaseReddit):
         """Get the stylesheet and associated images for the given subreddit."""
         return self.request_json(self.config['stylesheet'] %
                                  six.text_type(subreddit))['data']
-
-    @reddit.decorators.require_login
-    @reddit.decorators.require_moderator
-    def get_wiki_banned(self, subreddit):
-        """Get the list of wiki banned users for the given subreddit."""
-        return self.request_json(self.config['wikibanned'] %
-                                 six.text_type(subreddit))
-
-    @reddit.decorators.require_login
-    @reddit.decorators.require_moderator
-    def get_wiki_contributors(self, subreddit):
-        """Get the list of wiki contributors for the given subreddit."""
-        return self.request_json(self.config['wikicontributors'] %
-                                 six.text_type(subreddit))
-
 
     @reddit.decorators.require_login
     @reddit.decorators.require_moderator
