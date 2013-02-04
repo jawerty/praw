@@ -125,6 +125,8 @@ class BasicHelper(object):
             self.link_url_link = 'http://google.com/?q=29.9093488449'
             self.more_comments_url = self.url('/r/reddit_test6/comments/y/')
             self.other_user_id = 'pk'
+            self.refresh_token = {
+                'modconfig':       'gGysx8Tnc13hR52_5ZTVYH3GtzY'}
 
     def delay(self, amount=None):
         if amount:
@@ -1018,9 +1020,11 @@ class OAuth2Test(unittest.TestCase, BasicHelper):
         self.r.refresh_access_information(self.refresh_token['identity'])
         self.assertEqual(self.un, self.r.get_me().name)
 
-    @reddit_only
     def test_scope_modconfig(self):
         self.r.refresh_access_information(self.refresh_token['modconfig'])
+        self.assertTrue('images' in
+                        self.r.get_subreddit(self.sr).get_stylesheet())
+        # This appears to fail locally for some reason
         self.r.get_subreddit(self.sr).set_settings('foobar')
 
     @reddit_only

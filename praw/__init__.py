@@ -939,6 +939,12 @@ class ModConfigMixin(AuthenticatedReddit):
                                  six.text_type(subreddit))['data']
 
     @decorators.restrict_access(scope='modconfig')
+    def get_stylesheet(self, subreddit):
+        """Return the stylesheet and images for the given subreddit."""
+        return self.request_json(self.config['stylesheet'] %
+                                 six.text_type(subreddit))['data']
+
+    @decorators.restrict_access(scope='modconfig')
     def set_settings(self, subreddit, title, public_description='',
                      description='', language='en', subreddit_type='public',
                      content_options='any', over_18=False, default_set=True,
@@ -1252,12 +1258,6 @@ class ModOnlyMixin(AuthenticatedReddit):
         """Return a get_content generator of spam-filtered items."""
         return self.get_content(self.config['spam'] % six.text_type(subreddit),
                                 limit=limit)
-
-    @decorators.restrict_access(scope=None, mod=True)
-    def get_stylesheet(self, subreddit):
-        """Return the stylesheet and images for the given subreddit."""
-        return self.request_json(self.config['stylesheet'] %
-                                 six.text_type(subreddit))['data']
 
     @decorators.restrict_access(scope=None, mod=True)
     def get_unmoderated(self, subreddit='mod', limit=0):
